@@ -119,7 +119,7 @@ def argument_parsing(parser):
 
 
 def get_datasets(dataset_list: List[AnyStr], tokenizer):
-    from rank_datasets import AnthropicRLHF, GPTJSynthetic, HFSummary, OAPrivate, WebGPT
+    from rank_datasets import AnthropicRLHF, GPTJSynthetic, HFSummary, OAPrivate, WebGPT # the dataset loader is in the rank_datasets.py and it is customized dataset loader class
     from torch.utils.data import ConcatDataset
 
     train_datasets, evals = [], {}

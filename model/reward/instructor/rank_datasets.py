@@ -334,3 +334,32 @@ class OAPrivate(Dataset):
         context, pair = self.pairs[index]
 
         return context, pair
+
+class ChadDDT(Dataset):
+    """
+    This is an Extend from webGPT class to support out custom dataset
+    """
+
+    def __init__(self, HF_path) -> None:
+        super().__init__()
+
+        dataset = load_dataset(HF_path)
+        questions = {}
+        # using prompt as our index will allows us
+        # to add additional generated prompt later
+        self.index2question = {}
+        for row in dataset["train"]:
+            question = row["question"]["full_text"]
+            if question not in self.index2question:
+                self.index2question[len(self.index2question)] = question
+
+            if question not in questions:
+                questions[question] = []
+
+            if row["score_0"] > row["score_1"]:
+                # not going to risk it
+                questions[question].append((row["answer_0"], row["answer_1"]))
+            else:
+                questions[question].append((row["answer_1"], row["answer_0"]))
+
+        self.questions = questions
