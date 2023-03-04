@@ -12,7 +12,7 @@ from transformers import AutoModelForSequenceClassification, PreTrainedModel, Tr
 from transformers.training_args import OptimizerNames
 from utils import argument_parsing, freeze_top_n_layers, get_datasets, get_tokenizer
 
-os.environ["WANDB_PROJECT"] = "reward-model"
+os.environ["WANDB_PROJECT"] = "ChadDDT" # need to me modded
 
 accuracy = evaluate.load("accuracy")
 parser = ArgumentParser()
@@ -21,7 +21,7 @@ parser.add_argument("--local_rank", type=int, default=-1)
 parser.add_argument("--deepspeed", action="store_true")
 parser.set_defaults(deepspeed=False)
 parser.add_argument("--no-deepspeed", dest="deepspeed", action="store_false")
-parser.add_argument("--wandb-entity", type=str, default="open-assistant")
+parser.add_argument("--wandb-entity", type=str, default="hrnph") # need to me modded to your usr name
 parser.add_argument("--output_dir", type=str, default=None)
 
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         model = freeze_top_n_layers(model, num_layer)
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
-        print("Number of trainable : {}M".format(int(params / 1e6)))
+        print("Number of trainable : {}M".format(round(params / 1e6)))
 
     optimizer = OptimizerNames.ADAMW_HF
     args = TrainingArguments(
@@ -160,8 +160,9 @@ if __name__ == "__main__":
         report_to="wandb",
     )
 
+    # This is where datasets was downloaded and cached
     tokenizer = get_tokenizer(training_conf["tokenizer_name"])
-    train, evals = get_datasets(training_conf["datasets"], tokenizer)
+    train, evals = get_datasets(training_conf["datasets"], tokenizer) # get_datasets lies in utils.py it's a custom function
     if "rankgen" in model_name:
         collate_fn = RankGenCollator(tokenizer, max_length=training_conf["max_length"])
     else:
@@ -191,5 +192,10 @@ if __name__ == "__main__":
         compute_metrics=compute_metrics,
         # optimizers=(optimizer, scheduler),
     )
+    print("------ Start Training ----")
+    print(f"model name : {model_name}")
+    # note that the tokenizer max length need to be the same in config and in the tokenizer
+    print(f"tokenizer max lenght : {tokenizer.model_max_length}")
+    print("---- end of start debug log ----")
     trainer.train()
     trainer.evaluate()
